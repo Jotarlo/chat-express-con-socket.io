@@ -59,22 +59,24 @@ io.on("connection", (socket) => {
     console.log("An user connected");
 
     socket.on("join", (username) => {
-        console.log(`${username} joined the chat with socketId ${socket.id}`)
+        console.log(`The user ${username} has joined the chat.`);
         users[socket.id] = username;
     });
 
-    socket.on("message", (message) => {
+    socket.on("messageFromClient", (message) => {
+        console.log(`Message from ${users[socket.id]}: ${message}`);
         const user = users[socket.id] || "User";
-        io.emit("message", { user, message });
+        io.emit("messageFromServer", { user, message });
     });
 
-    socket.on("privateMessage", (data) => {
+    socket.on("privateMessageFromClient", (data) => {
+        console.log(`Private message from ${users[socket.id]} to ${data.recipient}`);
         const user = users[socket.id] || "User";
         const recipientSocket = Object.keys(users).find(
             (socketId) => users[socketId] === data.recipient
         );
         if (recipientSocket) {
-            io.to(recipientSocket).emit("privateMessage", {
+            io.to(recipientSocket).emit("privateMessageFromServer", {
                 user,
                 recipient: data.recipient,
                 message: data.message,

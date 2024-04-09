@@ -23,13 +23,14 @@
       document.querySelector("#usernameChat").innerHTML = username;
       if (username) {
         socket.emit("join", username);
+        alert("User joined:" + username);
       }
 
-      socket.on("message", (data) => {
+      socket.on("messageFromServer", (data) => {
         displayMessage(data);
       });
 
-      socket.on("privateMessage", (data) => {
+      socket.on("privateMessageFromServer", (data) => {
         displayPrivateMessage(data);
       });
 
@@ -37,7 +38,7 @@
         const messageInput = document.getElementById("messageInput");
         const message = messageInput.value.trim();
         if (message !== "") {
-          socket.emit("message", message);
+          socket.emit("messageFromClient", message);
           messageInput.value = "";
         }
       }
@@ -50,7 +51,7 @@
         const recipient = recipientInput.value.trim();
         const message = privateMessageInput.value.trim();
         if (recipient && message) {
-          socket.emit("privateMessage", { recipient, message });
+          socket.emit("privateMessageFromClient", { recipient, message });
           displayPrivateMessage({ user: "You", recipient, message });
           privateMessageInput.value = "";
         }
