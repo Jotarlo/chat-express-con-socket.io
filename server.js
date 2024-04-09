@@ -17,11 +17,42 @@ const io = socketIo(server, {
     }
   });
 
+let conexiones = {
+    salas: [
+        {
+            "ABC":[
+                {
+                    "identificador":"12345",
+                    "habilitado":true,
+                    "socketId": "abc12345"
+                },
+                {
+                    "identificador":"3333",
+                    "habilitado":true,
+                    "socketId": "abc33345"
+                }
+            ],
+            
+            "XYZ":[
+                {
+                    "identificador":"5555",
+                    "habilitado":true,
+                    "socketId": "abasd2345"
+                },
+                {
+                    "identificador":"66666",
+                    "habilitado":true,
+                    "socketId": "asd98987"
+                }
+            ]
+        }
+    ]
+};
 
 let users = {};
 
 app.get("/", (req, res) => {
-    res.send("Server chat is running");
+    res.send("Server chat is running and ready to accept connections");
 });
 
 io.on("connection", (socket) => {
