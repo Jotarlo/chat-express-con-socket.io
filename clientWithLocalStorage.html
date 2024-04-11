@@ -1,0 +1,116 @@
+<!-- Create an html with two sections -->
+<html>
+  <head>
+    <title>Chat</title>
+    <!-- add tag for bootstrap css -->
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
+    />
+    <!-- add tag for socket io -->
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+  </head>
+  <body>
+    
+
+<!-- Add section to show the username -->
+    <section class="container">
+      <h2>En sesión</h2>
+      <label id="usernameInSession"></label>
+    <!-- Add section for a responsive form to send public messages using socket io and bootstrap css-->
+    <section class="container">
+      <h2>Chat Room</h2>
+      <ul id="messages"></ul>
+      <input
+        id="messageInput"
+        type="text"
+        autocomplete="off"
+        class="form-control"
+      />
+      <button onclick="sendMessage()" class="btn btn-primary">
+        Send General Message
+      </button>
+    </section>
+    <!-- Add section for a responsive form to send private messages using socket io and bootstrap css-->
+    <section class="container">
+      <h2>Private Chat</h2>
+      <input
+        id="recipientInput"
+        placeholder="Recipient's username"
+        class="form-control"
+      />
+      <input
+        id="privateMessageInput"
+        autocomplete="off"
+        type="text"
+        class="form-control"
+      />
+      <button onclick="sendPrivateMessage()" class="btn btn-primary">
+        Send Private Message
+      </button>
+      <ul id="privateMessages"></ul>
+    </section>
+
+    <script>
+        const socket = io("http://localhost:3010");
+  
+        let currentUsername = localStorage.getItem("ChatUsername");
+        if (!currentUsername) {
+          const username = prompt("Enter your username:");
+          if (username) {
+            socket.emit("join", username);
+            localStorage.setItem("ChatUsername", username);
+            alert("User joined:" + username);
+          }
+          currentUsername = username;
+        }
+  
+        document.getElementById("usernameInSession").innerHTML = currentUsername;
+  
+        socket.on("messageFromServer", (data) => {
+          displayMessage(data);
+        });
+  
+        socket.on("privateMessageFromServer", (data) => {
+          displayPrivateMessage(data);
+        });
+  
+        function sendMessage() {
+          const messageInput = document.getElementById("messageInput");
+          const message = messageInput.value.trim();
+          if (message !== "") {
+            socket.emit("messageFromClient", message);
+            messageInput.value = "";
+          }
+        }
+  
+        function sendPrivateMessage() {
+          const recipientInput = document.getElementById("recipientInput");
+          const privateMessageInput = document.getElementById(
+            "privateMessageInput"
+          );
+          const recipient = recipientInput.value.trim();
+          const message = privateMessageInput.value.trim();
+          if (recipient && message) {
+            socket.emit("privateMessageFromClient", { recipient, message });
+            displayPrivateMessage({ user: "You", recipient, message });
+            privateMessageInput.value = "";
+          }
+        }
+  
+        function displayMessage(data) {
+          const messages = document.getElementById("messages");
+          const li = document.createElement("li");
+          li.innerHTML = `${data.user}: ${data.message}`;
+          messages.appendChild(li);
+        }
+  
+        function displayPrivateMessage(data) {
+          const privateMessages = document.getElementById("privateMessages");
+          const li = document.createElement("li");
+          li.innerHTML = `${data.user} -> ${data.recipient}: ${data.message}`;
+          privateMessages.appendChild(li);
+        }
+      </script>
+  </body>
+</html>
